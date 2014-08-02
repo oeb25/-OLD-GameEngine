@@ -21,15 +21,21 @@ class GameObject {
 
 		for (let i = 0; i < diagonal; i++) {
 			this.pos.x += x/diagonal;
-			objects.forEach((block) => {
-				if (block != this && !block.player && this.overlap(block))
+			this.familly.inner.forEach((other) => {
+				if (other != this && !other.player && this.overlap(other)) {
 					this.pos.x -= x/diagonal;
+				}
 			});
 
 			this.pos.y += y/diagonal;
-			objects.forEach((block) => {
-				if (block != this && !block.player && this.overlap(block))
+			this.familly.inner.forEach((other) => {
+				if (other != this && !other.player && this.overlap(other)) {
 					this.pos.y -= y/diagonal;
+					if (this.vspeed && y < 0) {
+						this.vspeed = 0;
+						console.log(y);
+					}
+				}
 			});
 		};
 
@@ -72,15 +78,25 @@ class GameObject {
 		return (!is.onLeftSide && !is.onRightSide && !is.over && !is.under);
 	}
 
-	draw() {
-		let { ctx } = GameObject;
+	draw(widthin) {
+		let { ctx, canvas } = GameObject;
 
 		if (!this.onScreen)
 			return false;
+		
+		ctx.strokeStyle = '#999';
 
-		ctx.fillStyle = '#999';
+		let fam = this.familly
 
-		ctx.fillRect(this.pos.x, this.pos.y, this.width, this.height);
+		if (fam) {
+			ctx.strokeRect(
+/*X*/			fam.pos.x + this.pos.x * fam.width / canvas.width,
+/*Y*/			fam.pos.y + this.pos.y * fam.height / canvas.height,
+/*WIDHT*/		this.width * (fam.width / canvas.width),
+/*HEIGHT*/		this.height * (fam.height / canvas.height))
+		} else {
+			ctx.strokeRect(this.pos.x, this.pos.y, this.width, this.height);
+		}
 
 		return true;
 	}

@@ -3,13 +3,16 @@ let GameObject = require('./object.js');
 let goAgain = true;
 
 class Player extends GameObject {
-	constructor(x, y, width, height, gravity = 8) {
+	constructor(x, y, width, height, leftKey, rightKey, upKey) {
 		super(x, y, width, height);
-		this.gravity = gravity;
+		this.gravity = 8;
 		this.looking = 1;
 		this.vspeed = 0;
-		this.jumpingPower = 16;
+		this.jumpingPower = 20;
 		this.player = true;
+		this.leftKey = leftKey;
+		this.rightKey = rightKey;
+		this.jump = upKey;
 	}
 
 	shoot(x, y) {
@@ -24,13 +27,13 @@ class Player extends GameObject {
 		return bullet;
 	}
 
-	update(bullets) {
+	update() {
 		let { keys, gamepad, canvas } = Player;
 
 		if (this.vspeed < 0)
 			this.vspeed = 0;
 
-		if ((keys.w.pressed || gamepad.buttons.a.pressed) && this.onGround)
+		if ((this.jump.pressed || gamepad.buttons.a.pressed) && this.onGround)
 			this.vspeed = this.jumpingPower;
 
 		this.move(0, -this.vspeed + this.gravity);
@@ -43,7 +46,7 @@ class Player extends GameObject {
 		if (this.pos.y > canvas.height)
 			this.pos.y = -this.height;
 
-		if (keys.d.pressed) {
+		if (this.rightKey.pressed) {
 			this.move(5,0);
 			this.looking = 1;
 		} else if (gamepad.stick.left.x > 0.2) {
@@ -51,7 +54,7 @@ class Player extends GameObject {
 			this.looking = 1;
 		}
 
-		if (keys.a.pressed) {
+		if (this.leftKey.pressed) {
 			this.move(-5,0);
 			this.looking = -1;
 		} else if (gamepad.stick.left.x < -0.2) {
@@ -64,9 +67,9 @@ class Player extends GameObject {
 			if (goAgain) {
 				goAgain = false;
 				if (gamepad.stick.right.x < -0.2 || gamepad.stick.right.x > 0.2 || gamepad.stick.right.y < -0.2 || gamepad.stick.right.y > 0.2) {
-					bullets.push(this.shoot(gamepad.stick.right.x, gamepad.stick.right.y));
+					//bullets.push(this.shoot(gamepad.stick.right.x, gamepad.stick.right.y));
 				} else {
-					bullets.push(this.shoot(this.looking, 0));
+					//bullets.push(this.shoot(this.looking, 0));
 				}
 			}
 			

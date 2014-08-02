@@ -29,6 +29,18 @@ let keys = {
 	space: {
 		code: 32,
 		pressed: false
+	},
+	right: {
+		code: 39,
+		pressed: false
+	},
+	left: {
+		code: 37,
+		pressed: false
+	},
+	up: {
+		code: 38,
+		pressed: false
 	}
 };
 

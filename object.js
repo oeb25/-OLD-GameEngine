@@ -21,15 +21,21 @@ var GameObject = (function(){var DP$0 = Object.defineProperty;"use strict";
 
 		for (var i = 0; i < diagonal; i++) {
 			this.pos.x += x/diagonal;
-			objects.forEach(function(block)  {
-				if (block != this$0 && !block.player && this$0.overlap(block))
+			this.familly.inner.forEach(function(other)  {
+				if (other != this$0 && !other.player && this$0.overlap(other)) {
 					this$0.pos.x -= x/diagonal;
+				}
 			});
 
 			this.pos.y += y/diagonal;
-			objects.forEach(function(block)  {
-				if (block != this$0 && !block.player && this$0.overlap(block))
+			this.familly.inner.forEach(function(other)  {
+				if (other != this$0 && !other.player && this$0.overlap(other)) {
 					this$0.pos.y -= y/diagonal;
+					if (this$0.vspeed && y < 0) {
+						this$0.vspeed = 0;
+						console.log(y);
+					}
+				}
 			});
 		};
 
@@ -72,15 +78,25 @@ var GameObject = (function(){var DP$0 = Object.defineProperty;"use strict";
 		return (!is.onLeftSide && !is.onRightSide && !is.over && !is.under);
 	}
 
-	GameObject.prototype.draw = function() {
-		var ctx = GameObject.ctx;
+	GameObject.prototype.draw = function(widthin) {
+		var ctx = GameObject.ctx, canvas = GameObject.canvas;
 
 		if (!this.onScreen)
 			return false;
+		
+		ctx.strokeStyle = '#999';
 
-		ctx.fillStyle = '#999';
+		var fam = this.familly
 
-		ctx.fillRect(this.pos.x, this.pos.y, this.width, this.height);
+		if (fam) {
+			ctx.strokeRect(
+/*X*/			fam.pos.x + this.pos.x * fam.width / canvas.width,
+/*Y*/			fam.pos.y + this.pos.y * fam.height / canvas.height,
+/*WIDHT*/		this.width * (fam.width / canvas.width),
+/*HEIGHT*/		this.height * (fam.height / canvas.height))
+		} else {
+			ctx.strokeRect(this.pos.x, this.pos.y, this.width, this.height);
+		}
 
 		return true;
 	}

@@ -1,6 +1,5 @@
 var gulp = require('gulp'),
 	express = require('express'),
-	sourcemaps = require('gulp-sourcemaps'),
 	es6 = require('gulp-es6-transpiler'),
 	plumber = require('gulp-plumber'),
 	livereload = require('gulp-livereload'),
@@ -36,3 +35,11 @@ gulp.task('default', ['serve', 'es6', 'browserify'], function() {
 	gulp.watch('./es6/*.js', ['es6']);
 	gulp.watch('./*.js', ['browserify']);
 });
+
+gulp.task('concat', function () {
+	gulp.src('static/main.js')
+	.pipe(uglify())
+	.pipe(gulp.dest('dist'));
+});
+
+gulp.task('build', ['es6', 'browserify', 'concat']);

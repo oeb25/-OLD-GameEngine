@@ -3,7 +3,7 @@ var GameObject = require('./object.js'),
 	gamepad = require('./gamepad.js'),
 	Player = require('./player.js'),
 	keys = require('./keys.js'),
-	raf = require('raf');
+	raf = window.requestAnimationFrame;
 
 var canvasContainer = document.getElementById('gameContainer'),
 	canvas = document.createElement('canvas'),
@@ -17,54 +17,61 @@ canvas.pos = {
 canvas.width = 1280;
 canvas.height = 720;
 
+var player = new Player(100, 100, 32, 32, keys.a, keys.d, keys.w);
+
+canvas.inner = [
+	player,
+	new GameObject(160, 680, 600, 10),
+	new GameObject(200, 680 - (2 * 2) - 1, 20, (2 * 2) + 1),
+	new GameObject(220, 680 - 2, 20, 2)
+];
+
 canvasContainer.appendChild(canvas);
 
-var bullets = [];
+var update = function (object) {
+	object.inner.forEach(function(a)  {
+		a.familly = object;
+		if (a.update)
+			a.update(object);
 
-var gravity = 8;
+		if (a.inner)
+			update(a);
+	});
+};
 
-var objects = [];
+var addToDrawQueue = function (object, inner) {
+	object.inner.forEach(function(a)  {
+		drawQueue.push(a);
 
-objects.push(
-	new Player(100, 100, 32, 32, gravity),
-	new GameObject(160, 680, 600, 10),
-	new GameObject(200, 680 - 100, 20, 100)
-);
+		if (a.inner)
+			addToDrawQueue(a);
+	});
+};
+
+var drawQueue = [];
 
 gamepad.init();
 
-GameObject.init(['canvas', 'objects', 'ctx'], canvas, objects, ctx);
-Player.init(['canvas', 'keys', 'gamepad'], canvas, keys, gamepad);
+var inner = [
+	new Player(0, 100, 100, 100, keys.left, keys.right, keys.up),
+	new GameObject(500, 500, 500, 20)
+];
+
+player.inner = inner;
+
+GameObject.init(['canvas', 'ctx'], canvas, ctx);
+Player.init(['canvas', 'keys', 'gamepad', 'ctx'], canvas, keys, gamepad, ctx);
 
 raf(function gameloop() {
 	raf(gameloop);
 
-	var drawQueue = [];
+	drawQueue = [];
 
 	gamepad.update();
 
-	objects.forEach(function(object)  {if (object.update) object.update(bullets)});
+	update(canvas)
 
-	bullets.forEach(function(bullet, i)  {
-		if (bullet.timeLeft-- > 0) {
-			var moved = bullet.move(bullet.vel.x, bullet.vel.y).dist;
-
-			if (bullet.vel.x !== 0 && moved.x / bullet.vel.x > -0.9) {
-				bullet.vel.x = 0;
-			}
-
-			if (bullet.vel.y !== 0 && moved.y / bullet.vel.y > -0.9) {
-				bullet.vel.y = 0;
-			}
-
-			if (bullet.vel.x === 0 || bullet.vel.y === 0)
-				bullets.splice(i, 1);
-
-			drawQueue.push(bullet);
-		}
-	});
-
-	objects.forEach(function(a)  {return drawQueue.push(a)});
+	addToDrawQueue(canvas);
 
 	ctx.clearRect(0, 0, canvas.width, canvas.height);
 
